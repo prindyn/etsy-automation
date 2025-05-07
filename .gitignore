@@ -1,0 +1,51 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+*$py.class
+
+# === Virtual Environments ===
+.venv/
+venv/
+ENV/
+env.bak/
+env/
+
+# === Logs ===
+*.log
+logs/
+*.out
+
+# === Environment Variables (common patterns) ===
+.env
+.env.*
+.envrc
+
+# === Editor + OS Files ===
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*.bak
+
+# === Compiled/Dist ===
+*.so
+*.egg-info/
+dist/
+build/
+
+# === Docker ===
+*.tar
+*.pid
+*.sock
+
+# === Test Artifacts ===
+htmlcov/
+coverage.xml
+.tox/
+.cache/
+pytest_cache/
+
+# === Jupyter/IPython ===
+.ipynb_checkpoints/

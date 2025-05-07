@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  market-research-api:
+    build: .
+    container_name: market-research-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  market-research-worker:
+    build: .
+    container_name: market-research-worker
+    command: celery -A app.services.tasks.celery_app worker --loglevel=info
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: market-research-redis
+    ports:
+      - "6379:6379"

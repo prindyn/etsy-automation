@@ -1,0 +1,16 @@
+# === Redis ===
+dump.rdb
+
+# === Data/artifacts ===
+*.db
+*.sqlite3
+*.cache
+*.csv
+
+# === Temporary Dev Files ===
+*.debug
+*.bak
+*.tmp
+
+# === Mock outputs (if using) ===
+mock_outputs/

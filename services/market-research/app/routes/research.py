@@ -2,27 +2,32 @@ from fastapi import APIRouter, Query, Body, HTTPException
 from typing import List, Dict
 from loguru import logger
 
-from app.models.keyword import KeywordEntry
+from app.models.keyword import KeywordResponse
 from app.tasks.keyword_tasks import process_keyword_task
 from app.storage.keywords import KeywordCache, KeywordQueue
 from app.services.redis_service import get_cache, set_cache
-from app.services.keyword_scraper_etsy import get_top_keywords
+from app.services.keyword_scraper_etsy import (
+    get_top_keywords as top_etsy_keywords,
+)
+from app.services.keyword_scraper_gumroad import (
+    get_top_keywords as top_gumroad_keywords,
+)
 from app.services.trends_scraper_google import get_trending_keywords
 
 router = APIRouter(prefix="/keywords", tags=["Market Keyword Research"])
 
 
-@router.get("/etsy", response_model=List[KeywordEntry])
-async def top_etsy_keywords(
-    q: str = Query("digital planner"), limit: int = Query(50, ge=1, le=100)
+@router.get("/etsy", response_model=List[KeywordResponse])
+async def get_top_etsy_keywords(
+    q: str = Query("digital planner"), limit: int = Query(100, ge=1, le=1000)
 ):
     """
     Get top Etsy keywords using scraping or API.
     """
-    return await get_top_keywords(keyword=q, limit=limit)
+    return await top_etsy_keywords(keyword=q, limit=limit)
 
 
-@router.get("/google", response_model=List[KeywordEntry])
+@router.get("/google", response_model=List[KeywordResponse])
 async def top_google_keywords(
     q: str = Query("digital planner"), limit: int = Query(10, ge=1, le=20)
 ):
@@ -30,6 +35,16 @@ async def top_google_keywords(
     Get trending keywords from Google Trends for the given query.
     """
     return await get_trending_keywords(keyword=q, limit=limit)
+
+
+@router.get("/gumroad", response_model=List[KeywordResponse])
+async def get_top_gumroad_keywords(
+    q: str = Query("digital planner"), limit: int = Query(100, ge=1, le=1000)
+):
+    """
+    Get top Gumroad keywords using scraping or API.
+    """
+    return await top_gumroad_keywords(keyword=q, limit=limit)
 
 
 @router.post("/queue")

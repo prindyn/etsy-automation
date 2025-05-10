@@ -28,7 +28,8 @@ async def get_trending_keywords(
     Get trending related keywords from Google Trends.
     Falls back to pytrends.suggestions if related queries fail.
     """
-    cache_obj = TrendsCache(source="google", keyword=keyword)
+    keyword = keyword.strip().lower().replace(" ", "+") + f":{limit}"
+    cache_obj = TrendsCache("google", keyword)
 
     cached = await get_cache(cache_obj)
     if cached:
@@ -43,16 +44,17 @@ async def get_trending_keywords(
             raise ValueError("No related queries found, triggering fallback.")
 
         ranked = [
-            {"keyword": row["query"].lower(), "count": int(row["value"])}
+            {"keyword": row["query"].lower(), "score": int(row["value"])}
             for _, row in top_df.head(limit).iterrows()
         ]
 
-        await set_cache(TrendsCache("google", keyword, ranked), ttl_sec=3600)
-        return ranked
-
     except Exception as e:
         logger.warning(f"[Fallback] Google Trends failed: {e}")
-        return await fallback_to_suggestions(keyword, limit)
+        ranked = await fallback_to_suggestions(keyword, limit)
+
+    cache_obj.value = ranked
+    await set_cache(cache_obj, ttl_sec=3600)
+    return ranked
 
 
 async def fallback_to_suggestions(
@@ -69,14 +71,9 @@ async def fallback_to_suggestions(
             return []
 
         fallback_results = [
-            {"keyword": s["title"].lower(), "count": i + 1}
+            {"keyword": s["title"].lower(), "score": i + 1}
             for i, s in enumerate(suggestions[:limit])
         ]
-
-        await set_cache(
-            TrendsCache("google", keyword, fallback_results),
-            ttl_sec=3600,
-        )
         return fallback_results
 
     except Exception as e:

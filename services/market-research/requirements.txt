@@ -17,3 +17,7 @@ lxml==5.2.1  # Optional for parsing performance
 
 # Logging
 loguru==0.7.2
+
+# ML
+spacy==3.8.5
+scikit-learn==1.6.1

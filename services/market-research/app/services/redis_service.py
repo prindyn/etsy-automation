@@ -28,7 +28,6 @@ async def get_cache(
     storage: RedisCapable,
     parse_json: bool = True,
 ) -> Optional[Union[dict, list, str]]:
-    print(storage.cache_key())
     raw = await redis.get(storage.cache_key())
     if raw is None:
         return None

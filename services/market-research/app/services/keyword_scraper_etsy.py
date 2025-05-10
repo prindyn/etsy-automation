@@ -17,8 +17,8 @@ async def get_top_keywords(
     keyword: str,
     limit: int = 100,
 ) -> List[Dict[str, str]]:
-    keyword = keyword.strip().lower().replace(" ", "-")
-    cache_obj = KeywordCache(source="etsy", keyword=keyword)
+    keyword = keyword.strip().lower().replace(" ", "-") + f":{limit}"
+    cache_obj = KeywordCache("etsy", keyword)
 
     # Try cache
     cached = await get_cache(cache_obj)
@@ -31,7 +31,7 @@ async def get_top_keywords(
         logger.warning(f"Etsy API failed: {e}, falling back to scraping...")
         keywords = await fetch_from_scraping(keyword, limit)
 
-    cache_obj = KeywordCache(source="etsy", keyword=keyword, value=keywords)
+    cache_obj.value = keywords
     await set_cache(cache_obj, ttl_sec=3600)
     return keywords
 
@@ -92,4 +92,4 @@ async def fetch_from_scraping(
 
 def _rank_keywords(tags: List[str]) -> List[Dict[str, str]]:
     tag_counts = Counter(tags)
-    return [{"keyword": k, "count": v} for k, v in tag_counts.most_common()]
+    return [{"keyword": k, "score": v} for k, v in tag_counts.most_common()]
